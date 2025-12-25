@@ -1,25 +1,25 @@
-# Customer Churn Prediction Project
+# Customer Churn Prediction (MATLAB)
 
 ## Project Overview
-This project focuses on predicting customer churn using the **Telco Customer Churn** dataset.
+This project focuses on predicting **customer churn** using the Telco Customer Churn dataset.
 
-Customer churn means that a client stops using the company’s services.  
-The goal of this project is not only to build machine learning models, but also to **optimize decision-making** by selecting an appropriate classification threshold.
+Customer churn means that a customer stops using the company’s services.  
+The main goal of this project is to **identify customers who are likely to leave**, so that the business can take proactive retention actions.
 
-The project follows a complete data science pipeline:
+The project follows a **complete machine learning pipeline**:
 - Data preprocessing
 - Feature engineering
 - Model training
+- Hyperparameter tuning
 - Threshold optimization
-- Model evaluation
-- Model comparison
+- Model evaluation and comparison
 
-The implementation is done in **MATLAB**.
+All experiments are implemented in **MATLAB**.
 
 ---
 
-## Dataset
-**Source:** Telco Customer Churn dataset  
+## Dataset Description
+**Dataset:** Telco Customer Churn  
 
 Each row represents one customer.  
 The target variable is:
@@ -28,204 +28,197 @@ The target variable is:
   - `Yes` → customer left
   - `No` → customer stayed
 
-The dataset includes:
+The dataset contains:
 - Customer demographics
 - Service usage information
 - Contract and billing details
+
+Approximate dataset size: **~7000 customers**
 
 ---
 
 ## Data Preprocessing
 
-### Removing Unnecessary Columns
-- The column `customerID` was removed since it does not provide predictive information.
+### Removing Non-Informative Columns
+- The column `customerID` was removed because it is only an identifier and does not help predict churn.
 
 ---
 
 ### Handling Missing Values
-- The feature `TotalCharges` contained 11 missing values.
+- The feature `TotalCharges` contained **11 missing values**.
 - These rows correspond to customers with `tenure = 0`.
-- Since this represents less than 0.2% of the dataset, the rows were removed.
+- Since this is less than **0.2% of the dataset**, the rows were removed.
 
 ---
 
 ### Target Encoding
-- `Churn` was converted to a binary variable:
+- The target variable `Churn` was converted to binary format:
   - Yes → 1
   - No → 0
 
 ---
 
 ### Categorical Feature Encoding
-- One-hot encoding was applied to categorical features.
+- One-hot encoding was applied to all categorical features.
 
 Model-specific handling:
 - **Logistic Regression:** one reference category removed to avoid multicollinearity.
-- **Decision Tree / Random Forest:** all categories retained.
+- **Decision Tree / Random Forest:** all categories kept.
 
 ---
 
 ### Feature Scaling
-- Numerical features were standardized **only for Logistic Regression**.
+- Numerical features (`tenure`, `MonthlyCharges`, `TotalCharges`) were standardized **only for Logistic Regression**.
 - Tree-based models were trained on raw numerical values.
 
 ---
 
 ### Train–Test Split
-- 70% training set
-- 30% test set
-- Fixed random seed used for reproducibility
+- 70% training data
+- 30% test data
+- Fixed random seed for reproducibility
 
 ---
 
 ## Models Used
 
 The following models were trained and evaluated:
-1. Logistic Regression
-2. Decision Tree
-3. Random Forest
+
+1. Logistic Regression  
+2. Decision Tree  
+3. Random Forest  
+
+All models were evaluated on the same test set.
 
 ---
 
-## Evaluation Strategy
+## Evaluation Metrics
 
-In addition to standard evaluation at threshold = 0.5, this project includes **threshold optimization**.
+The following metrics were used:
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
 
-Why threshold optimization is important:
-- Churn datasets are usually **imbalanced**
-- Missing a churner (False Negative) is more costly than a false alarm
-- Default threshold (0.5) is often suboptimal
+Because churn data is imbalanced and **missing a churner is costly**, special attention was paid to **Recall** and **F1-score**.
+
+---
+
+## Threshold Optimization
+
+### Why Threshold Optimization?
+The default classification threshold (0.5) is often **not optimal** for churn problems.
+
+- False Negatives (missed churners) are more expensive than False Positives
+- Lowering the threshold allows the model to catch more churners
 
 Thresholds were optimized to **maximize F1-score**, balancing precision and recall.
 
 ---
 
-## Logistic Regression (Final Model)
+## Logistic Regression (Final)
 
-### Model Description
-Logistic Regression predicts the probability that a customer will churn.
+**Regularization:**
+- Lambda (MATLAB): 0.4706  
+- C (scikit-learn equivalent): 2.1251  
 
-Regularization was applied using:
-- **Lambda (MATLAB):** 0.4706  
-- **C (scikit-learn equivalent):** 2.1251  
+**Optimal threshold:** 0.30  
 
----
+**Final Results:**
+- ROC-AUC: 0.825
+- Accuracy: 76.1%
+- Precision: 53.6%
+- Recall: **73.9%**
+- F1-score: **0.621**
 
-### Threshold Optimization
-- Tested multiple thresholds
-- Best threshold selected based on F1-score
-
-**Best threshold:** 0.30
-
----
-
-### Final Results
-- **ROC-AUC:** 0.825
-- **Accuracy:** 76.1%
-- **Precision:** 53.6%
-- **Recall:** **73.9%**
-- **F1-score:** **0.621**
+**Interpretation:**  
+Lowering the threshold significantly improved recall, making Logistic Regression a strong baseline model for churn prevention.
 
 ---
 
-### Interpretation
-- Lowering the threshold significantly increased recall
-- The model now detects most churners
-- Some increase in false positives is accepted
-- This setup is more suitable for churn prevention tasks
+## Decision Tree (Final)
 
----
-
-## Decision Tree (Final Model)
-
-### Model Description
-Decision Tree uses if–else rules to classify customers.
-
-### Optimized Hyperparameters
+**Optimized hyperparameters:**
 - MinLeafSize: 47
 - MaxNumSplits: 500
 - CCP Alpha: 0.000857
 
----
+**Optimal threshold:** 0.25  
 
-### Threshold Optimization
-**Best threshold:** 0.25
+**Final Results:**
+- ROC-AUC: 0.810
+- Accuracy: 75.8%
+- Precision: 53.2%
+- Recall: **73.2%**
+- F1-score: **0.617**
 
----
-
-### Final Results
-- **ROC-AUC:** 0.810
-- **Accuracy:** 75.8%
-- **Precision:** 53.2%
-- **Recall:** **73.2%**
-- **F1-score:** **0.617**
+**Interpretation:**  
+Threshold tuning improved recall, but the model remains less stable than ensemble methods.
 
 ---
 
-### Interpretation
-- Threshold tuning significantly improved recall
-- Performance is close to Logistic Regression
-- Tree remains less stable but interpretable
+## Random Forest (Final – Best Model)
+
+**Optimized hyperparameters:**
+- Number of trees: **624**
+- Max depth: **5**
+- Min leaf size: **47**
+
+**Optimal threshold:** **0.35**
+
+**Final Results:**
+- ROC-AUC: **0.843**
+- Accuracy: 78.2%
+- Precision: 57.1%
+- Recall: **72.0%**
+- F1-score: **0.637**
+
+**Interpretation:**  
+After hyperparameter tuning and threshold optimization, Random Forest achieved the **best overall performance**.
 
 ---
 
-## Random Forest (Baseline Threshold = 0.5)
-
-### Model Description
-Random Forest is an ensemble of decision trees.
-
-### Results
-- **ROC-AUC:** 0.838
-- **Accuracy:** 79.4%
-- **Precision:** 63.0%
-- **Recall:** 54.5%
-- **F1-score:** 0.584
-
----
-
-### Interpretation
-- Best ranking performance (AUC)
-- Conservative at threshold 0.5
-- Recall can be further improved by threshold tuning
-
----
-
-## Model Comparison (After Threshold Optimization)
+## Final Model Comparison
 
 | Model | Threshold | AUC | Accuracy | Precision | Recall | F1 |
 |-----|---------|----|---------|----------|--------|----|
-| Logistic Regression | 0.30 | 0.825 | 76.1% | 53.6% | **73.9%** | **0.621** |
+| Logistic Regression | 0.30 | 0.825 | 76.1% | 53.6% | **73.9%** | 0.621 |
 | Decision Tree | 0.25 | 0.810 | 75.8% | 53.2% | 73.2% | 0.617 |
-| Random Forest | 0.50 | **0.838** | **79.4%** | **63.0%** | 54.5% | 0.584 |
+| **Random Forest** | **0.35** | **0.843** | 78.2% | 57.1% | 72.0% | **0.637** |
 
 ---
 
 ## Final Conclusion
 
-Key insights from the project:
+After optimizing both **model hyperparameters** and **classification thresholds**:
 
-- **Logistic Regression with threshold optimization** provides the best balance between recall and precision.
-- **Decision Tree** becomes competitive after threshold tuning but remains less stable.
-- **Random Forest** shows the strongest ranking ability (highest AUC) but requires threshold adjustment to improve recall.
+- **Random Forest** achieved the best balance between precision and recall
+- Logistic Regression remains a strong and interpretable baseline
+- Decision Tree is mainly useful for interpretability
 
 ### Recommended Model
-- For **churn prevention (catch as many churners as possible)**:
-  → **Logistic Regression with threshold = 0.30**
-- For **ranking customers by churn risk**:
-  → **Random Forest**
+✅ **Random Forest with threshold = 0.35**
+
+This model is the most suitable for churn prevention tasks.
 
 ---
 
-## Business Insight
-Lowering the classification threshold allows the company to proactively identify at-risk customers and apply retention strategies, accepting a controlled number of false alarms in exchange for reducing lost customers.
+## Business Impact
+
+By optimizing the classification threshold, the company can:
+- Identify more at-risk customers
+- Reduce customer loss
+- Apply proactive retention strategies
+
+Accepting a controlled number of false alarms is justified by the reduction in missed churners.
 
 ---
 
 ## Future Improvements
-- Threshold optimization for Random Forest
 - Cost-sensitive learning
 - Gradient boosting models (CatBoost, XGBoost)
 - SHAP-based feature importance
+- Model deployment and monitoring
 
 ---
-
